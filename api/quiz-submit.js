@@ -74,10 +74,16 @@ module.exports = async (req, res) => {
     });
 
     if (!tgResponse.ok) {
-      console.error("Telegram error", await tgResponse.text());
+      const errorText = await tgResponse.text();
+      console.error("Telegram error", errorText);
       res.statusCode = 502;
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ ok: false, error: "telegram_error" }));
+      res.end(
+        JSON.stringify({
+          ok: false,
+          error: "telegram_error: " + errorText
+        })
+      );
       return;
     }
 
@@ -91,4 +97,3 @@ module.exports = async (req, res) => {
     res.end(JSON.stringify({ ok: false, error: "server_error" }));
   }
 };
-
