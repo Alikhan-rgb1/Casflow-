@@ -233,7 +233,7 @@ function handleSubmitForm() {
     nextBtn.disabled = true;
     resultEl.textContent = "Отправляем...";
 
-    fetch("http://localhost:3001/api/quiz-submit", {
+    fetch("/api/quiz-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
