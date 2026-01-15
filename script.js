@@ -75,6 +75,8 @@ const questions = [
     }
 ];
 
+const answersStore = new Array(questions.length).fill(null);
+
 const cardEl = document.querySelector(".quiz-card");
 const titleEl = document.getElementById("title");
 const questionEl = document.getElementById("question");
@@ -153,6 +155,12 @@ function handleAnswer(button, index) {
     button.classList.add("selected");
     resultEl.textContent = "";
 
+    const question = questions[currentQuestionIndex];
+    answersStore[currentQuestionIndex] = {
+        question: question.text,
+        answer: button.textContent
+    };
+
     nextBtn.disabled = false;
 }
 
@@ -217,14 +225,43 @@ function handleSubmitForm() {
         return;
     }
 
-    firstNameInput.disabled = true;
-    phoneInput.disabled = true;
-    nextBtn.style.display = "none";
+    const preparedAnswers = answersStore.map((entry, index) => ({
+        question: questions[index].text,
+        answer: entry ? entry.answer : "не выбран"
+    }));
 
-    titleEl.textContent = "Спасибо!";
-    questionEl.textContent = "Заявка отправлена, наш менеджер свяжется с тобой в ближайшее время.";
-    answersEl.innerHTML = "";
-    resultEl.textContent = "";
+    nextBtn.disabled = true;
+    resultEl.textContent = "Отправляем...";
+
+    fetch("http://localhost:3001/api/quiz-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name: firstName,
+            phone: phone,
+            answers: preparedAnswers
+        })
+    })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error("network");
+            }
+            return res.json();
+        })
+        .then(() => {
+            firstNameInput.disabled = true;
+            phoneInput.disabled = true;
+            nextBtn.style.display = "none";
+
+            titleEl.textContent = "Спасибо!";
+            questionEl.textContent = "Заявка отправлена, наш менеджер свяжется с тобой в ближайшее время.";
+            answersEl.innerHTML = "";
+            resultEl.textContent = "";
+        })
+        .catch(() => {
+            resultEl.textContent = "Не получилось отправить. Попробуй ещё раз позже.";
+            nextBtn.disabled = false;
+        });
 }
 
 renderWelcome();

@@ -1,0 +1,15 @@
+{
+  "name": "cashflow-quiz",
+  "version": "1.0.0",
+  "description": "Анкета для игры Cash Flow",
+  "main": "server.cjs",
+  "scripts": {
+    "start": "node server.cjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.12"
+  }
+}
+
