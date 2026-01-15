@@ -243,10 +243,16 @@ function handleSubmitForm() {
         })
     })
         .then((res) => {
-            if (!res.ok) {
-                throw new Error("network");
-            }
-            return res.json();
+            return res
+                .json()
+                .catch(() => ({}))
+                .then((data) => {
+                    if (!res.ok || !data || data.ok === false) {
+                        const code = data && data.error ? data.error : "network";
+                        throw new Error(code);
+                    }
+                    return data;
+                });
         })
         .then(() => {
             firstNameInput.disabled = true;
@@ -258,8 +264,8 @@ function handleSubmitForm() {
             answersEl.innerHTML = "";
             resultEl.textContent = "";
         })
-        .catch(() => {
-            resultEl.textContent = "Не получилось отправить. Попробуй ещё раз позже.";
+        .catch((err) => {
+            resultEl.textContent = "Не получилось отправить. Код ошибки: " + err.message;
             nextBtn.disabled = false;
         });
 }
