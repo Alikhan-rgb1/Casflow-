@@ -1,5 +1,28 @@
 const fetch = require("node-fetch");
 
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = "";
+
+    req.on("data", (chunk) => {
+      data += chunk;
+    });
+
+    req.on("end", () => {
+      try {
+        const parsed = data ? JSON.parse(data) : {};
+        resolve(parsed);
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    req.on("error", (err) => {
+      reject(err);
+    });
+  });
+}
+
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
     res.statusCode = 405;
@@ -19,12 +42,13 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { name, phone, answers } = req.body || {};
+    const body = await readBody(req);
+    const { name, phone, answers } = body || {};
 
     if (!name || !phone || !Array.isArray(answers)) {
       res.statusCode = 400;
       res.setHeader("Content-Type", "application/json");
-      res.end({ ok: false, error: "bad_request" });
+      res.end(JSON.stringify({ ok: false, error: "bad_request" }));
       return;
     }
 
