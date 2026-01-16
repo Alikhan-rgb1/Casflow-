@@ -33,6 +33,8 @@ module.exports = async (req, res) => {
 
   const BOT_TOKEN = process.env.TG_BOT_TOKEN;
   const CHAT_ID = process.env.TG_CHAT_ID;
+  const BOT_TOKEN_2 = process.env.TG_BOT_TOKEN_2;
+  const CHAT_ID_2 = process.env.TG_CHAT_ID_2;
 
   if (!BOT_TOKEN || !CHAT_ID) {
     res.statusCode = 500;
@@ -85,6 +87,32 @@ module.exports = async (req, res) => {
         })
       );
       return;
+    }
+
+    if (BOT_TOKEN_2 && CHAT_ID_2) {
+      const url2 = "https://api.telegram.org/bot" + BOT_TOKEN_2 + "/sendMessage";
+      const tgResponse2 = await fetch(url2, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHAT_ID_2,
+          text: text
+        })
+      });
+
+      if (!tgResponse2.ok) {
+        const errorText2 = await tgResponse2.text();
+        console.error("Telegram second bot error", errorText2);
+        res.statusCode = 502;
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({
+            ok: false,
+            error: "telegram_error_second: " + errorText2
+          })
+        );
+        return;
+      }
     }
 
     res.statusCode = 200;
